@@ -6,10 +6,6 @@ const id  = document.querySelector("#id"),
 
 loginBtn.addEventListener("click", login);
 
-// const login = () => {
-//     console.log("1123");
-// }
-
 function login() {
     const req = {
         id: id.value,
@@ -21,7 +17,7 @@ function login() {
     fetch("/login", {
         method: "POST",
         headers: {
-            "Conetent-Type": "application/json",
+            "Content-Type": "application/json",
         },
         body: JSON.stringify(req)
     });
