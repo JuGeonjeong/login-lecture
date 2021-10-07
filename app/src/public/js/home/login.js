@@ -12,13 +12,16 @@ function login() {
         password: password.value,
     };
 
-    console.log(JSON.stringify(req));
+    // console.log(JSON.stringify(req));
 
-    fetch("/login", {
+    fetch("/login", { // html과 연결되어있는 자바스크립트 파일
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify(req)
+        body: JSON.stringify(req),
+    }).then((res) => res.json())
+    .then((res) => {
+        
     });
 }
