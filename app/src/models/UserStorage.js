@@ -1,13 +1,23 @@
 "use strict";
 
+const fs = require("fs").promises;
+
 class UserStorage {
-    static #users = {
-        id: ["admin1", "admin2", "admin3"],
-        password: ["1234", "1234" ,"1234"],
-        name: ["관리자1", "관리자2", "관리자3"],
+    static #getUserInfo(data, id) {
+        const users = JSON.parse(data);
+        const idx = users.id.indexOf(id);
+        const usersKeys = Object.keys(users);
+        const userInfo = usersKeys.reduce((newUser, info) => {
+            newUser[info] = users[info][idx];
+            return newUser;
+        }, {});
+        return userInfo;
     }
-    static getUsers(...fields) {
-        const users = this.#users;
+
+    static #getUsers(data, isAll, fields) {
+        const users = JSON.parse(data);
+        if(isAll) return users;
+
         const newUsers = fields.reduce((newUsers, field) => {
             if (users.hasOwnProperty(field)) {
                 newUsers[field] = users[field];
@@ -16,16 +26,36 @@ class UserStorage {
         }, {});
         return newUsers;
     }
-    static getUserInfo(id) {
-        const users = this.#users;
-        const idx = users.id.indexOf(id);
-        const usersKeys = Object.keys(users);
-        const userInfo = usersKeys.reduce((newUser, info) => {
-            newUser[info] = users[info][idx];
-            return newUser;
-        }, {})
 
-        return userInfo;
+    static getUsers(isAll, ...fields) {
+        return fs
+            .readFile("./src/databases/db/users.json")
+            .then((data) => {
+            return this.#getUsers(data, isAll, fields);
+        })
+            .catch(console.error);
+    }
+
+    static getUserInfo(id) {
+        return fs
+            .readFile("./src/databases/db/users.json")
+            .then((data) => {
+            return this.#getUserInfo(data, id);
+        })
+            .catch(console.error);
+    }
+
+
+    static async save(userInfo) {
+        const users = await this.getUsers(true);
+        if(users.id.includes(userInfo.id)) {
+            throw "이미 존재하는 아이디 입니다.";
+        }
+        users.id.push(userInfo.id);
+        users.name.push(userInfo.name);
+        users.password.push(userInfo.password);
+        fs.writeFile("./src/databases/db/users.json", JSON.stringify(users));
+        return { success: true };
     }
 }
 
